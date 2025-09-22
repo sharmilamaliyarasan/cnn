@@ -40,7 +40,7 @@ def add_bg_from_local(image_file):
     )
 
 
-add_bg_from_local("images/images.jpeg")
+add_bg_from_local("images.jpeg")
 
 st.markdown("""
     <style>
@@ -133,3 +133,4 @@ if uploaded_file is not None:
     st.markdown(f'<p class="predicted">Predicted Digit: {pred}</p>', unsafe_allow_html=True)
 
 st.markdown('</div>', unsafe_allow_html=True)
+
