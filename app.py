@@ -3,6 +3,7 @@ from tensorflow.keras.models import load_model
 from PIL import Image, ImageOps
 import numpy as np
 import base64
+import os
 
 model = load_model("digit_cnn_model.h5")
 
@@ -13,13 +14,22 @@ st.set_page_config(
 )
 
 def add_bg_from_local(image_file):
-    with open(image_file, "rb") as f:
+    """Set a background image for Streamlit app (works locally and on Streamlit Cloud)."""
+    current_dir = os.path.dirname(__file__)
+    image_path = os.path.join(current_dir, image_file)
+
+    if not os.path.exists(image_path):
+        st.error(f"Background image not found: {image_path}")
+        return
+
+    with open(image_path, "rb") as f:
         encoded = base64.b64encode(f.read()).decode()
+
     st.markdown(
         f"""
         <style>
         .stApp {{
-            background-image: url("data:image/png;base64,{encoded}");
+            background-image: url("data:image/jpeg;base64,{encoded}");
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -29,8 +39,8 @@ def add_bg_from_local(image_file):
         unsafe_allow_html=True
     )
 
-add_bg_from_local("images/images.jpeg")
 
+add_bg_from_local("images/images.jpeg")
 
 st.markdown("""
     <style>
@@ -109,13 +119,14 @@ st.markdown('<p class="subtitle">Upload a digit image (0-9) and see the predicti
 uploaded_file = st.file_uploader("", type=["png", "jpg", "jpeg"])
 
 if uploaded_file is not None:
-    
     img = Image.open(uploaded_file).convert('L')
     st.image(img, caption='Uploaded Image', use_column_width=True, output_format="PNG")
    
+    
     img_resized = img.resize((28,28))
     img_array = ImageOps.invert(img_resized)
     img_array = np.array(img_array).reshape(1,28,28,1)/255.0
+    
     
     pred = np.argmax(model.predict(img_array), axis=1)[0]
     
